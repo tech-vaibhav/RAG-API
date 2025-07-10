@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+faiss-cpu
+sentence-transformers
+llama-cpp-python
+langchain
+pypdf
+python-multipart
+passlib[bcrypt]
+python-jose
+# PostgreSQL & Async ORM
+asyncpg
+databases
+sqlalchemy
+psycopg2-binary
