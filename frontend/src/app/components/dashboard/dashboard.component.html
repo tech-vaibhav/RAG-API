@@ -1,0 +1,151 @@
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <!-- Header -->
+    <div class="sidebar-header">
+      <div class="app-logo">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="18" height="18" rx="3" fill="currentColor"/>
+            <path d="M8 12h8M8 8h8M8 16h5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="app-info">
+          <h1 class="app-title">RAG Assistant</h1>
+          <p class="app-subtitle">AI-powered knowledge companion</p>
+        </div>
+      </div>
+      <div class="user-info" (click)="toggleUserMenu()">  
+        <div class="user-avatar">{{ currentUser.charAt(0).toUpperCase() }}</div>
+        <span class="username">{{ currentUser }}</span>
+        <svg class="user-menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+        <div class="user-dropdown" *ngIf="showUserMenu">
+          <button class="logout-btn" (click)="logout()">Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Chat Button -->
+    <button class="new-chat-btn" (click)="startNewChat()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect width="3" height="3" x="9" y="9" fill="currentColor"/>
+        <path d="M5 12V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v5"/>
+        <path d="M5 12v5a1 1 0 0 0 1 1h6m6-6 4 4-4 4"/>
+      </svg>
+      New Chat
+    </button>
+
+    <!-- Recent Chats -->
+    <div class="recent-chats">
+      <h3 class="section-title">Recent Chats</h3>
+      <div class="chat-list">
+        <div 
+          *ngFor="let chat of chats" 
+          class="chat-item"
+          [class.active]="chat.isActive"
+          (click)="selectChat(chat.id)">
+          <div class="chat-title">{{ chat.title }}</div>
+          <div class="chat-preview">{{ chat.lastMessage }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Chat Header -->
+    <div class="chat-header">
+      <div class="assistant-info">
+        <div class="assistant-avatar">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+            <line x1="9" y1="9" x2="9.01" y2="9"/>
+            <line x1="15" y1="9" x2="15.01" y2="9"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="assistant-name">RAG Assistant</h2>
+          <p class="assistant-status">AI-powered knowledge companion</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Welcome Message -->
+    <div *ngIf="!getActiveChatId()" class="welcome-message">
+      <h1>Welcome {{ currentUser }} to your own RAG</h1>
+      <p>Click <strong>“New Chat”</strong> to begin asking questions.</p>
+    </div>
+    
+    <!-- Messages Area -->
+    <div class="messages-area" #messagesContainer>
+      <div class="messages-container">
+        <div *ngFor="let message of messages" class="message" [class.user-message]="message.isUser">
+          <div class="message-avatar" *ngIf="!message.isUser">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+              <line x1="9" y1="9" x2="9.01" y2="9"/>
+              <line x1="15" y1="9" x2="15.01" y2="9"/>
+            </svg>
+          </div>
+          <div class="message-content">
+            <div class="message-text">{{ message.content }}</div>
+            <div class="message-time">{{ formatTime(message.timestamp) }}</div>
+          </div>
+        </div>
+
+        <!-- Loading indicator -->
+        <div *ngIf="isLoading" class="message">
+          <div class="message-avatar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+              <line x1="9" y1="9" x2="9.01" y2="9"/>
+              <line x1="15" y1="9" x2="15.01" y2="9"/>
+            </svg>
+          </div>
+          <div class="message-content">
+            <div class="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-area">
+      <div class="input-container">
+        <button class="attachment-btn" (click)="attachDocument()" title="Upload PDF or TXT document">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+            <polyline points="14,2 14,8 20,8"/>
+            <path d="M12 18v-6m-3 3l3-3 3 3"/>
+          </svg>
+        </button>
+        
+        <textarea 
+          [(ngModel)]="currentMessage"
+          (keydown)="onKeyPress($event)"
+          placeholder="Ask me anything about your knowledge base..."
+          class="message-input"
+          rows="1"></textarea>
+        
+        <button 
+          class="send-btn" 
+          (click)="sendMessage()"
+          [disabled]="!currentMessage.trim() || isLoading">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 2 11 13"/>
+            <polygon points="22,2 15,22 11,13 2,9"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

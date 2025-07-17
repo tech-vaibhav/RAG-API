@@ -1,0 +1,83 @@
+<!-- src/app/components/signup/signup.component.html -->
+<div class="login-container">
+  <div class="auth-card">
+    <!-- Logo and App Title -->
+    <div class="logo-section">
+      <div class="logo">📋</div>
+      <h1 class="app-title">RAG Assistant</h1>
+      <p class="app-subtitle">Your AI-powered knowledge companion</p>
+    </div>
+
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+      <h2 class="welcome-title">Welcome</h2>
+      <p class="welcome-subtitle">Sign in to your account or create a new one</p>
+    </div>
+
+    <!-- Tab Container -->
+    <div class="tab-container">
+      <button class="tab-button" type="button" (click)="navigateToLogin()">Login</button>
+      <button class="tab-button active" type="button">Sign Up</button>
+    </div>
+
+    <!-- Signup Form -->
+    <form (ngSubmit)="signup()" #signupForm="ngForm">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input 
+          type="text" 
+          class="form-input"
+          [(ngModel)]="fullName" 
+          name="fullName" 
+          placeholder="Enter your full name"
+          required 
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input 
+          type="email" 
+          class="form-input"
+          [(ngModel)]="username" 
+          name="username" 
+          placeholder="Enter your email"
+          required 
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input 
+          type="password" 
+          class="form-input"
+          [(ngModel)]="password" 
+          name="password" 
+          placeholder="Create a password"
+          required 
+          minlength="6"
+        />
+      </div>
+
+      <button 
+        type="submit" 
+        class="submit-button"
+        [disabled]="!signupForm.form.valid || isLoading"
+      >
+        <span *ngIf="isLoading">🔄</span>
+        <span *ngIf="!isLoading">👤</span>
+        {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+      </button>
+
+      <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+    </form>
+
+    <!-- Link to Login -->
+    <div class="auth-link">
+      <a href="#" (click)="navigateToLogin(); $event.preventDefault()">
+        Already have an account? Sign in here
+      </a>
+    </div>
+  </div>
+</div>
